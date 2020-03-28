@@ -44,7 +44,7 @@ class AlarmHandler():
                 if msg['type'] == "ALARM":
                     self.time_last_kick_received == cur_time
                     if msg['val'] != 0:
-                        self.request_queue({'type': 'error', 'value': msg['val']})
+                        self.request_queue.put({'type': 'error', 'value': msg['val']})
 
             # Have we received a watchdog kick in time?
             if ((cur_time - self.time_watchdog_kick_checked) > 3):

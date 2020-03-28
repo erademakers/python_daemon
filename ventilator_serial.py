@@ -93,6 +93,6 @@ class SerialHandler():
 
             for type in settings_types:
                 if line.startswith((type + '=')):
-                    self.request_queue.put({'type': 'setting', 'key': type, 'val': val}, False)
+                    self.request_queue.put({'type': 'setting', 'key': type, 'value': val}, False)
 
 
