@@ -8,7 +8,7 @@ import time
 
 class SerialHandler():
 
-    def __init__(self, db_queue, request_queue, out_queue, alarm_queue, port='/dev/ttyACM0', baudrate=115200):
+    def __init__(self, db_queue, request_queue, out_queue, alarm_queue, port='/dev/ventilator', baudrate=115200):
         self.ser = serial.Serial(port, baudrate)
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
