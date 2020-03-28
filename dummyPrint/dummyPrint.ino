@@ -24,10 +24,10 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
-  Serial.println("bpm=1");
-  Serial.println("Vol=2"); 
-  Serial.println("Trig=3");
-  Serial.println("Pres=4");
+  Serial.println("BPM=100");
+  Serial.println("VOL=200"); 
+  Serial.println("TRIG=0");
+  Serial.println("PRES=20");
 
   if (Serial.available() > 0) {
     rcv = Serial.read();
@@ -45,5 +45,5 @@ void loop() {
   }
  
  
-  delay(1000);
+  delay(100);
 }

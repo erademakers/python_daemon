@@ -3,6 +3,8 @@ import websocket
 import json
 import asyncio
 import websockets
+import ventilator_protocol
+
 
 class WebsocketHandler():
 
@@ -14,6 +16,12 @@ class WebsocketHandler():
         msg['id'] = self.id
         print(msg)
         self.ws.send(json.dumps(msg))
+
+    def handle_settings(self, settings):
+        for key in ventilator_protocol.settings:
+            if key in settings:
+                msg = {'type': key, 'val': settings[key]}
+                self.serial_queue.put(msg)
 
     def subscribe(self, path):
         """
@@ -43,12 +51,18 @@ class WebsocketHandler():
             if msg['type'] == "ping":
                 reply = {'type': 'ping'}
                 self.send_msg(reply)
+            elif msg['type'] == "pub":
+                payload = msg['message']
+                if payload['type'] == "setting":
+                    self.handle_settings(payload)
 
-    def __init__(self, addr='localhost', port=3001):
+
+    def __init__(self, serial_queue, addr='localhost', port=3001):
         url = "ws://" + addr + ":" + str(port) + "/"
         self.ws = websocket.WebSocket()
         self.ws.connect(url)
         self.id = 1
+        self.serial_queue = serial_queue
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ Ventilator Serial Handler
 import serial
 import queue
 import time
+import ventilator_protocol
 
 
 class SerialHandler():
@@ -63,36 +64,17 @@ class SerialHandler():
             tokens = line.split('=', 1)
             val = tokens[-1].rstrip('\r\n')
 
-            if line.startswith('ALARM='):
+            if line.startswith(ventilator_protocol.alarm + '='):
                 self.alarm_queue.put({'type': 'ALARM', 'val': val})
 
 
             # handle measurements
-            measurement_types = ['BPM',  # Breaths per minute
-                                 'VOL',  # Volume
-                                 'TRIG', # Trigger
-                                 'PRES'  # Pressure
-            ]
-
-            for type in measurement_types:
+            for type in ventilator_protocol.measurements:
                 if line.startswith((type + '=')):
                     self.queue_put(type, val)
 
             # handle settings
-            settings_types = ['RR',   # Respiratory rate
-                              'VT',   # Tidal Volume
-                              'PK',   # Peak Pressure
-                              'TS',  # Breath Trigger Threshold
-                              'IE',   # Inspiration/Expiration (N for 1/N)
-                              'PP',   # PEEP (positive end expiratory pressure)
-                              'ADPK', # Allowed deviation Peak Pressure
-                              'ADVT', # Allowed deviation Tidal Volume
-                              'ADPP', # Allowed deviation PEEP
-                              'MODE'  # Machine Mode (Volume Control / Pressure Control)
-            ]
-
-            for type in settings_types:
+            for type in ventilator_protocol.settings:
                 if line.startswith((type + '=')):
-                    self.request_queue.put({'type': 'setting', 'key': type, 'value': val}, False)
-
-
+                    # Verify that the checksum is correct.
+                    pass
