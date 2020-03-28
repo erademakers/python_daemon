@@ -36,7 +36,7 @@ def run():
 
     ser_handler = SerialHandler(db_queue, request_queue, serial_output_queue, alarm_input_queue)
     db_handler = DbClient(db_queue)
-    # websocket_handler = WebsocketHandler()
+    websocket_handler = WebsocketHandler()
     alarm_handler = AlarmHandler(alarm_input_queue,serial_output_queue, request_queue)
     request_handler = RequestHandler(api_request, request_queue)
 
@@ -51,9 +51,9 @@ def run():
                                  args=('db thread',))
 
     # Thread that handles bidirectional websocket communication
-    # websocket_thread = mp.Process(target=websocket_handler.run,
-    #                                    daemon=True,
-    #                                    args=('websocket thread',))
+    websocket_thread = mp.Process(target=websocket_handler.run,
+                                       daemon=True,
+                                       args=('websocket thread',))
 
     # Thread that checks if an alarm should be raised given current measurements
     alarm_thread = mp.Process(target=alarm_handler.run,
@@ -68,7 +68,7 @@ def run():
 
     ser_thread.start()
     db_thread.start()
-    # websocket_thread.start()
+    websocket_thread.start()
     alarm_thread.start()
     request_thread.start()
 
@@ -76,7 +76,7 @@ def run():
     # Start waiting on Godot
     ser_thread.join()
     db_thread.join()
-    # websocket_thread.join()
+    websocket_thread.join()
     alarm_thread.join()
     request_thread.join()
 
