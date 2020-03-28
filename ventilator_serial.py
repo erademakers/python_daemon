@@ -9,14 +9,21 @@ import ventilator_protocol
 
 class SerialHandler():
 
-    def __init__(self, db_queue, request_queue, out_queue, alarm_queue, port='COM5', baudrate=115200):
+    def __init__(self, db_queue, request_queue, out_queue, alarm_queue, port='/dev/ventilator', baudrate=115200):
         self.port = port
         self.baudrate = baudrate
+        self.ser = None
+        try:
+            self.ser = serial.Serial(self.port, self.baudrate)
+            self.ser.reset_input_buffer()
+            self.ser.reset_output_buffer()
+        except:
+            self.attempt_reconnection()
+
         self.request_queue = request_queue
         self.db_queue = db_queue # Enqueue to
         self.out_queue = out_queue
         self.alarm_queue = alarm_queue
-        self.errorcounter = 0
 
     def queue_put(self, type, val):
         """
@@ -29,7 +36,12 @@ class SerialHandler():
         self.db_queue.put({'type': type, 'val': val})
         self.alarm_queue.put({'type': type, 'val': val})
 
-
+    def attempt_reconnection(self):
+            self.ser = None
+            try:
+                self.ser = serial.Serial(self.port, self.baudrate)
+            except:
+                pass
 
     def run(self, name):
         self.ser = serial.Serial(self.port, self.baudrate)
@@ -45,8 +57,16 @@ class SerialHandler():
 
             if msg != None:
                 msg_out = msg['type'] + "=" + str(msg['val']) + "\r\n"
-                self.ser.write(bytes(msg_out, 'ascii'))
+                try:
+                    self.ser.write(bytes(msg_out, 'ascii'))
+                except:
+                    self.attempt_reconnection()
 
+            line = ""
+            try:
+                line = self.ser.readline()
+            except:
+                self.attempt_reconnection()
 
             try:
                 line = self.ser.readline()
@@ -68,7 +88,6 @@ class SerialHandler():
                     # TODO: At the start it can happen that we get an incorrect message
                     # due to incomplete data. I do a hard abort here to ensure that this only
                     # happens once. We need to determine what a tolerable level of failure is here.
-
 
                 tokens = line.split('=', 1)
                 val = tokens[-1].rstrip('\r\n')

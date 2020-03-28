@@ -3,7 +3,7 @@ Ventilator database connection
 """
 import queue
 from datetime import datetime
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 
 
 class DbClient():
@@ -29,15 +29,23 @@ class DbClient():
         collection = self.db.trigger_values
         self.__store_value(collection, trigger_val)
 
+
     def __store_value(self, collection, val):
-        collection.insert_one({'value': val, 'loggedAt': datetime.utcnow()})
+        try:
+            collection.insert_one({'value': val, 'loggedAt': datetime.utcnow()})
+        except errors.ConnectionFailure:
+            print("Lost connection, client will attempt to reconnect")
 
     def run(self, name):
         print("Starting {}".format(name))
 
         # Only start MongoClient after fork()
-        client = MongoClient(self.addr)
-        self.db = client.beademing
+        try:
+            self.client = MongoClient(self.addr)
+        except errors.ConnectionFailure:
+            print("Unable to connect, client will attempt to reconnect")
+
+        self.db = self.client.beademing
         while True:
             try:
                 msg = self.queue.get()

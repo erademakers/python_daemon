@@ -63,9 +63,23 @@ class WebsocketHandler():
             except:
                 print("Invalid message from websockets {}".format(json_msg))
 
+    def attempt_reconnect(self):
+        while True:
+            try:
+                self.ws.connect(self.url)
+                if self.ws.connected == True:
+                    return
+            except:
+                continue
 
     def __init__(self, serial_queue, addr='localhost', port=3001):
         self.url = "ws://" + addr + ":" + str(port) + "/"
+        self.ws = websocket.WebSocket()
+        try:
+            self.ws.connect(self.url)
+        except:
+            self.attempt_reconnect()
+
         self.id = 1
         self.serial_queue = serial_queue
 
