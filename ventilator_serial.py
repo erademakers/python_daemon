@@ -4,7 +4,7 @@ Ventilator Serial Handler
 import serial
 import queue
 import time
-import ventilator_protocol
+import ventilator_protocol as proto
 
 
 class SerialHandler():
@@ -52,7 +52,7 @@ class SerialHandler():
                 msg = None
 
             if msg != None:
-                msg_out = msg['type'] + "=" + str(msg['val']) + "\r\n"
+                msg_out = msg['type'] + "=" + str(msg['val']) + "\n"
                 try:
                     self.ser.write(bytes(msg_out, 'ascii'))
                 except:
@@ -67,24 +67,50 @@ class SerialHandler():
             if line == "":
                 print("Unable to read from Serial")
                 continue
-            try:
-                line = line.decode('utf-8')
-                tokens = line.split('=', 1)
-                val = tokens[-1].rstrip('\r\n')
 
-                if line.startswith(ventilator_protocol.alarm + '='):
+
+            try:
+                line = line[:-2] # strip out '\r\n'
+                checksum = int(line[-1]) # get raw checksum value
+                line = line[:-1]
+                calculated_checksum = proto.compute_LRC(line)
+
+                if checksum != calculated_checksum:
+                    print(line)
+                    print("Checksum does not match, discard")
+                    print("key: {},"
+                          "val: {},"
+                          "checksum: {}, "
+                          "calculated_checksum: {}".format(key,
+                                                           int(val),
+                                                           checksum,
+                                                           calculated_checksum))
+                    continue
+                else:
+                    print("checksum OK")
+
+                line = line.decode('utf-8')
+                tokens = line.split('=')
+                key = tokens[0]
+                val = tokens[1]
+
+
+                if line.startswith(proto.alarm + '='):
                     self.alarm_queue.put({'type': 'ALARM', 'val': val})
 
 
                 # handle measurements
-                for type in ventilator_protocol.measurements:
-                    if line.startswith((type + '=')):
-                        self.queue_put(type, val)
+                for msgtype in proto.measurements:
+                    if line.startswith((msgtype + '=')):
+                        self.queue_put(msgtype, val)
 
                 # handle settings
-                for type in ventilator_protocol.settings:
-                    if line.startswith((type + '=')):
-                        # Verify that the checksum is correct.
-                        pass
+                for msgtype in proto.settings:
+                    if line.startswith((msgtype + '=')):
+                        if proto.settings_values[msgtype] != val:
+                            self.request_queue.put({'type': 'setting',
+                                                    'key': msgtype,
+                                                    'value': val})
+
             except:
                 print("Unable to decode message as UTF-8. Discarding")

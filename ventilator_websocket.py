@@ -3,7 +3,7 @@ import websocket
 import json
 import asyncio
 import websockets
-import ventilator_protocol
+import ventilator_protocol as proto
 
 
 class WebsocketHandler():
@@ -18,9 +18,11 @@ class WebsocketHandler():
         self.ws.send(json.dumps(msg))
 
     def handle_settings(self, settings):
-        for key in ventilator_protocol.settings:
+        for key in proto.settings:
             if key in settings:
-                msg = {'type': key, 'val': settings[key]}
+                #msg = {'type': key, 'val': settings[key]}
+                proto.settings_values[key] = settings[key]
+                msg = proto.construct_serial_message(key, settings[key])
                 self.serial_queue.put(msg)
 
     def subscribe(self, path):
