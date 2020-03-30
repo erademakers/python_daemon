@@ -1,4 +1,5 @@
 import requests
+import ventilator_protocol as proto
 
 class APIRequest():
 
@@ -7,8 +8,8 @@ class APIRequest():
 
     def __put(self, endpoint, data):
         try:
-            r = requests.put(url = self.base_address + endpoint, data = data) 
-  
+            r = requests.put(url = self.base_address + endpoint, data = data)
+
             data = r.json()
 
             if not data["result"]:
@@ -17,6 +18,7 @@ class APIRequest():
             print("Couldn't reach the server")
 
     def send_setting(self, key, val):
+        proto.settings_values['key'] = val
         self.__put("/api/settings", {key:val})
 
     def send_error(self, val):

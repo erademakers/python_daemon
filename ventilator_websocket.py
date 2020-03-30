@@ -21,9 +21,11 @@ class WebsocketHandler():
         for key in proto.settings:
             if key in settings:
                 #msg = {'type': key, 'val': settings[key]}
-                proto.settings_values[key] = settings[key]
-                msg = proto.construct_serial_message(key, settings[key])
-                self.serial_queue.put(msg)
+                if proto.settings_values[key] != settings[key]:
+                    print("send setting")
+                    proto.settings_values[key] = settings[key]
+                    msg = proto.construct_serial_message(key, settings[key])
+                    self.serial_queue.put(msg)
 
     def subscribe(self, path):
         """
