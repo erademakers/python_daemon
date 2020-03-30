@@ -10,6 +10,7 @@ This daemon has a number of tasks
 """
 import threading
 import queue
+import time
 import multiprocessing as mp
 from ventilator_database import DbClient
 from ventilator_serial import SerialHandler
@@ -73,13 +74,32 @@ def run():
     request_thread.start()
 
 
-    # Start waiting on Godot
+    while True:
+        # check if all subprocesses are running
+        if (ser_thread.is_alive() == False
+            or db_thread.is_alive() == False
+            or websocket_thread.is_alive() == False
+            or alarm_thread.is_alive() == False
+            or request_thread.is_alive() == False):
+                break
+
+        time.sleep(0.1)
+
+    print("One subprocess was terminated, killing other subprocesses")
+
+    ser_thread.kill()
+    db_thread.kill()
+    websocket_thread.kill()
+    alarm_thread.kill()
+    request_thread.kill()
+
+    # Then join before exiting
     ser_thread.join()
     db_thread.join()
     websocket_thread.join()
     alarm_thread.join()
     request_thread.join()
 
-
 if __name__ == "__main__":
     run()
+    print("Exiting")
