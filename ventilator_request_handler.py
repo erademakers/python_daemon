@@ -15,7 +15,10 @@ class RequestHandler:
                 msg = None
 
             if msg != None:
-                if msg['type'] == 'setting':
-                    self.api_client.send_setting(msg['key'], msg['value'])
-                elif msg['type'] == 'error':
-                    self.api_client.send_error(msg['value'])
+                try:
+                    if msg['type'] == 'setting':
+                        self.api_client.send_setting(msg['key'], msg['value'])
+                    elif msg['type'] == 'error':
+                        self.api_client.send_error(msg['value'])
+                except:
+                    print("Invalid message from request")
