@@ -47,14 +47,17 @@ class WebsocketHandler():
 
         while True:
             json_msg = self.ws.recv()
-            msg = json.loads(json_msg)
-            if msg['type'] == "ping":
-                reply = {'type': 'ping'}
-                self.send_msg(reply)
-            elif msg['type'] == "pub":
-                payload = msg['message']
-                if payload['type'] == "setting":
-                    self.handle_settings(payload)
+            try:
+                msg = json.loads(json_msg)
+                if msg['type'] == "ping":
+                    reply = {'type': 'ping'}
+                    self.send_msg(reply)
+                elif msg['type'] == "pub":
+                    payload = msg['message']
+                    if payload['type'] == "setting":
+                        self.handle_settings(payload)
+            except:
+                print("Invalid message from websockets {}", json_msg)
 
 
     def __init__(self, serial_queue, addr='localhost', port=3001):

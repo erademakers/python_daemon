@@ -45,12 +45,15 @@ class DbClient():
                 continue
 
 
-            if msg['type'] == 'BPM':
-                self.store_bpm(msg['val'])
-            elif msg['type'] == 'VOL':
-                self.store_volume(msg['val'])
-            elif msg['type'] == 'TRIG':
-                self.store_trigger(msg['val'])
-            elif msg['type'] == 'PRES':
-                self.store_pressure(msg['val'])
+            try:
+                if msg['type'] == 'BPM':
+                    self.store_bpm(msg['val'])
+                elif msg['type'] == 'VOL':
+                    self.store_volume(msg['val'])
+                elif msg['type'] == 'TRIG':
+                    self.store_trigger(msg['val'])
+                elif msg['type'] == 'PRES':
+                    self.store_pressure(msg['val'])
+            except:
+                print("Invalid message from database")
 

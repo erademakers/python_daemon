@@ -8,7 +8,6 @@ class APIRequest():
     def __put(self, endpoint, data):
         try:
             r = requests.put(url = self.base_address + endpoint, data = data) 
-  
             data = r.json()
 
             if not data["result"]:
