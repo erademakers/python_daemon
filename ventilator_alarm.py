@@ -1,6 +1,7 @@
 import queue
 import time
-
+from threading import Thread
+from ventilator_sound import SoundPlayer
 
 class AlarmHandler():
 
@@ -18,6 +19,8 @@ class AlarmHandler():
         self.request_queue = request_queue
 
         self.alarm_val = 0;
+        self.alarm_player_thread = SoundPlayer("assets/alarm.wav", 0, 0.1)
+        self.alarm_is_playing = False
 
         self.time_last_kick_sent = 0
         self.time_last_kick_received = 0
@@ -45,6 +48,13 @@ class AlarmHandler():
                     self.time_last_kick_received == cur_time
                     if msg['val'] != 0:
                         self.request_queue.put({'type': 'error', 'value': msg['val']})
+                        if self.alarm_is_playing == False:
+                            self.alarm_player_thread.start()
+                            self.alarm_is_playing = True
+                    else:
+                        if self.alarm_is_playing == True:
+                            self.alarm_player_thread.terminate()
+                            self.alarm_is_playing = False
 
             # Have we received a watchdog kick in time?
             if ((cur_time - self.time_watchdog_kick_checked) > 3):
