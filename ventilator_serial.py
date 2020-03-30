@@ -56,7 +56,13 @@ class SerialHandler():
                 msg = None
 
             if msg != None:
-                msg_out = msg['type'] + "=" + str(msg['val']) + "\n"
+                print("outgoing message: {}".format(msg))
+                msg_out = msg['type'] + "=" + str(msg['val'])  + "="
+                msg_bytes = bytearray(msg_out,'ascii')
+                msg_bytes.append(msg['checksum'])
+                msg_bytes = msg_bytes + bytearray("\r\n", 'ascii')
+                for byte in msg_bytes:
+                    print(byte)
                 try:
                     self.ser.write(bytes(msg_out, 'ascii'))
                 except:
@@ -90,8 +96,6 @@ class SerialHandler():
                                                            checksum,
                                                            calculated_checksum))
                     continue
-                else:
-                    print("checksum OK")
 
                 line = line.decode('utf-8')
                 tokens = line.split('=')
@@ -105,6 +109,7 @@ class SerialHandler():
                 # handle measurements
                 for msgtype in proto.measurements:
                     if line.startswith((msgtype + '=')):
+                        print("got measurement")
                         self.queue_put(msgtype, val)
 
                 # handle settings

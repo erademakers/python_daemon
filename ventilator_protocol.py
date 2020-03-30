@@ -23,16 +23,16 @@ settings = ['RR',   # Respiratory rate
 ]
 
 settings_values = {
-    'RR': 0,
-    'VT': 0,
-    'PK': 0,
-    'TS': 0,
-    'IE': 0,
-    'PP': 0,
-    'ADPK': 0,
-    'ADVT': 0,
-    'ADPP': 0,
-    'MODE': 0
+    'RR': -1,
+    'VT': -1,
+    'PK': -1,
+    'TS': -1,
+    'IE': -1,
+    'PP': -1,
+    'ADPK': -1,
+    'ADVT': -1,
+    'ADPP': -1,
+    'MODE': -1
 }
 
 def compute_LRC(bytes):
@@ -44,7 +44,7 @@ def compute_LRC(bytes):
 
 
 def construct_serial_message(key, val):
-    line = key + "=" + str(key) + "="
+    line = key + "=" + str(val) + "="
     line = line.encode('utf-8')
     checksum = compute_LRC(line)
     return {'type': key, 'val': val, 'checksum': checksum}
