@@ -103,18 +103,22 @@ class SerialHandler():
                                                            calculated_checksum))
                     continue
 
-                line = line.decode('utf-8')
+                id = line[-2]
+                line = line[:-2]
+     
+                line = line.decode('ascii')
                 tokens = line.split('=')
                 key = tokens[0]
+                print("Received message: {}".format(tokens))
+
+                print(line)
 
                 if line.startswith(proto.ack + '='):
-                    id = tokens[1]
                     print("Received ack for id {}".format(id))
                     del waiting_for_acks[id]
                 
                 if line.startswith(proto.alarm + '='):
                     val = tokens[1]
-                    id = tokens[2]
                     # acknowledge receipt
                     self.out_queue.put({'type': proto.ack, 'val': id })
 
@@ -126,9 +130,8 @@ class SerialHandler():
 
                 # handle settings
                 for msgtype in proto.settings:
-                    val = tokens[1]
-                    id = tokens[2]
                     if line.startswith((msgtype + '=')):
+                        val = tokens[1]
                         if proto.settings_values[msgtype] != val:
                             # send to GUI
                             self.request_queue.put({'type': 'setting',
@@ -142,16 +145,17 @@ class SerialHandler():
                 now = datetime.utcnow().timestamp()
                 delete = [] 
                 for waiting_message in waiting_for_acks.items():
-                    if waiting_message['sent_at'] + 1000 < now:
+                    if waiting_message[1]['sent_at'] + 1 < now:  #throws error
                         # resend message
-                        print("outgoing message: {}", waiting_message['msg'])
+                        print("outgoing message: {}", waiting_message[1]['msg'])
 
-                        self.out_queue.put(waiting_message['msg'])
-                        delete.append(key) 
+                        self.out_queue.put(waiting_message[1]['msg'])
+                        delete.append(waiting_message[0]) 
           
                 for i in delete:
                     del waiting_for_acks[i] 
 
-            except:
-                print("Unable to decode message as UTF-8. Discarding ", line)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
 
