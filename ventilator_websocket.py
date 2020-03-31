@@ -21,11 +21,10 @@ class WebsocketHandler():
         for key in proto.settings:
             if key in settings:
                 #msg = {'type': key, 'val': settings[key]}
-                if proto.settings_values[key] != settings[key]:
-                    print("send setting")
-                    proto.settings_values[key] = settings[key]
-                    msg = proto.construct_serial_message(key, settings[key])
-                    self.serial_queue.put(msg)
+                print("send setting")
+                proto.settings_values[key] = settings[key]
+                msg = proto.construct_serial_message({'type': key, 'val': settings[key]})
+                self.serial_queue.put(msg)
 
     def subscribe(self, path):
         """
@@ -61,7 +60,7 @@ class WebsocketHandler():
                     reply = {'type': 'ping'}
                     self.send_msg(reply)
                 elif msg['type'] == "pub":
-                    if msg['path'] == "/api/settings"
+                    if msg['path'] == "/api/settings":
                         payload = msg['message']
                         self.handle_settings(payload)
             except Exception as e:

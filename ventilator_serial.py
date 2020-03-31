@@ -18,6 +18,7 @@ class SerialHandler():
         self.db_queue = db_queue # Enqueue to
         self.out_queue = out_queue
         self.alarm_queue = alarm_queue
+        self.message_id = 0
 
     def queue_put(self, type, val):
         """
@@ -38,6 +39,7 @@ class SerialHandler():
                 pass
 
     def run(self, name):
+        waiting_for_acks = {}
         self.ser = serial.Serial(self.port, self.baudrate)
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
@@ -50,11 +52,22 @@ class SerialHandler():
                 msg = None
 
             if msg != None:
-                print("outgoing message: {}".format(msg))
-                msg_out = msg['type'] + "=" + str(msg['val'])  + "="
-                msg_bytes = bytearray(msg_out,'ascii')
-                msg_bytes.append(msg['checksum'])
-                msg_bytes = msg_bytes + bytearray("\n", 'ascii')
+                print("outgoing message: {} with id {}".format(msg, self.message_id))
+
+                if msg['type'] != 'ACK':
+                    msg_bytes = proto.construct_serial_message(msg['type'], msg['val'], self.message_id)
+
+                    waiting_for_ack = {'msg': msg, 'sent_at': datetime.utcnow().timestamp()}
+                    waiting_for_acks[self.message_id] = waiting_for_ack
+
+                    # we sent a message with id, so increment it
+                    self.message_id += 1
+
+                    if self.message_id == 256:
+                        self.message_id = 0                    
+                else:
+                    msg_bytes = proto.construct_ack_message(msg['val'])
+
                 try:
                     self.ser.write(msg_bytes)
                 except:
@@ -93,10 +106,17 @@ class SerialHandler():
                 line = line.decode('utf-8')
                 tokens = line.split('=')
                 key = tokens[0]
-                val = tokens[1]
 
+                if line.startswith(proto.ack + '='):
+                    id = tokens[1]
+                    print("Received ack for id {}".format(id))
+                    del waiting_for_acks[id]
+                
                 if line.startswith(proto.alarm + '='):
-                    self.alarm_queue.put({'type': 'ALARM', 'val': val})
+                    val = tokens[1]
+                    id = tokens[2]
+                    # acknowledge receipt
+                    self.out_queue.put({'type': proto.ack, 'val': id })
 
 
                 # handle measurements
@@ -106,11 +126,32 @@ class SerialHandler():
 
                 # handle settings
                 for msgtype in proto.settings:
+                    val = tokens[1]
+                    id = tokens[2]
                     if line.startswith((msgtype + '=')):
                         if proto.settings_values[msgtype] != val:
+                            # send to GUI
                             self.request_queue.put({'type': 'setting',
                                                     'key': msgtype,
                                                     'value': val})
+                            # acknowledge receipt
+                            self.out_queue.put({'type': proto.ack, 'val': id })
+
+
+                # resend messages waiting for ack
+                now = datetime.utcnow().timestamp()
+                delete = [] 
+                for waiting_message in waiting_for_acks.items():
+                    if waiting_message['sent_at'] + 1000 < now:
+                        # resend message
+                        print("outgoing message: {}", waiting_message['msg'])
+
+                        self.out_queue.put(waiting_message['msg'])
+                        delete.append(key) 
+          
+                for i in delete:
+                    del waiting_for_acks[i] 
 
             except:
                 print("Unable to decode message as UTF-8. Discarding ", line)
+

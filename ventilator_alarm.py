@@ -33,8 +33,7 @@ class AlarmHandler():
             cur_time = time.time()
             # Do we need to kick the watchdog?
             if ((cur_time - self.time_last_kick_sent) > 1 ):
-                msg = proto.construct_serial_message('ALARM', self.alarm_val)
-                self.serial_queue.put(msg)
+                self.serial_queue.put({'type': proto.alarm, 'val': self.alarm_val})
                 self.time_last_kick_sent = cur_time
 
             try:

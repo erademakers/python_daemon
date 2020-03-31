@@ -3,6 +3,7 @@ Settings definition for ventilator
 """
 
 alarm ="ALARM"
+ack ="ACK"
 
 measurements = ['BPM',  # Breaths per minute
                 'VOL',  # Volume
@@ -50,9 +51,22 @@ def compute_LRC(bytes):
 
     return checksum
 
+def construct_serial_message(key, val, id):
+    # every message we send has to have an id
+    msg_out = msg['type'] + "=" + str(msg['val'])  + "="
+    msg_bytes = bytearray(msg_out,'ascii')
+    msg_bytes.append(self.message_id.to_bytes(1, byteorder='big'))
+    msg_bytes.append(bytearray('=','ascii'))
+    msg_bytes.append(compute_LRC(msg_bytes))
+    msg_bytes.append(bytearray("\n", 'ascii'))
 
-def construct_serial_message(key, val):
-    line = key + "=" + str(val) + "="
-    line = line.encode('utf-8')
-    checksum = compute_LRC(line)
-    return {'type': key, 'val': val, 'checksum': checksum}
+    return msg_bytes
+
+def construct_ack_message(id):
+    msg_bytes = bytearray("ACK=", 'ascii')
+    msg_bytes.append(self.id.to_bytes(1, byteorder='big'))
+    msg_bytes.append(bytearray('=','ascii'))
+    msg_bytes.append(compute_LRC(msg_bytes))
+    msg_bytes.append(bytearray("\n", 'ascii'))
+
+    return msg_bytes
