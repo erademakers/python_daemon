@@ -1,0 +1,9 @@
+[Unit]
+Description=Python daemon to transmit ventilator data from/to Arduino and frontend
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/share/ventilator/daemon.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
