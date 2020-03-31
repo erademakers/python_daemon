@@ -20,10 +20,8 @@ class WebsocketHandler():
     def handle_settings(self, settings):
         for key in proto.settings:
             if key in settings:
-                #msg = {'type': key, 'val': settings[key]}
-                print("send setting")
-                proto.settings_values[key] = settings[key]
-                # self.serial_queue.put({'type': key, 'val': settings[key]})
+                print("send setting {}".format(key))
+                self.serial_queue.put({'type': key, 'val': settings[key]})
 
     def subscribe(self, path):
         """

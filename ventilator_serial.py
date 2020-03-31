@@ -54,19 +54,16 @@ class SerialHandler():
             if msg != None:
                 print("outgoing message: {} with id {}".format(msg, self.message_id))
 
-                if msg['type'] != 'ACK':
-                    msg_bytes = proto.construct_serial_message(msg['type'], msg['val'], self.message_id)
+                msg_bytes = proto.construct_serial_message(msg['type'], msg['val'], self.message_id)
 
-                    waiting_for_ack = {'msg': msg, 'sent_at': datetime.utcnow().timestamp()}
-                    waiting_for_acks[self.message_id] = waiting_for_ack
+                waiting_for_ack = {'msg': msg, 'sent_at': datetime.utcnow().timestamp()}
+                waiting_for_acks[self.message_id] = waiting_for_ack
 
-                    # we sent a message with id, so increment it
-                    self.message_id += 1
+                # we sent a message with id, so increment it
+                self.message_id += 1
 
-                    if self.message_id == 256:
-                        self.message_id = 0                    
-                else:
-                    msg_bytes = proto.construct_ack_message(msg['val'])
+                if self.message_id == 256:
+                    self.message_id = 0                    
 
                 try:
                     self.ser.write(msg_bytes)
@@ -76,12 +73,12 @@ class SerialHandler():
 
             line = ""
             try:
-                line = self.ser.readline()
+                if (self.ser.inWaiting()>0):
+                    line = self.ser.readline()
             except:
                 self.attempt_reconnection()
 
             if line == "":
-                print("Unable to read from Serial")
                 continue
 
 
@@ -109,9 +106,7 @@ class SerialHandler():
                 line = line.decode('ascii')
                 tokens = line.split('=')
                 key = tokens[0]
-                print("Received message: {}".format(tokens))
-
-                print(line)
+                print("Received message: {}".format(line))
 
                 if line.startswith(proto.ack + '='):
                     print("Received ack for id {}".format(id))
@@ -120,7 +115,14 @@ class SerialHandler():
                 if line.startswith(proto.alarm + '='):
                     val = tokens[1]
                     # acknowledge receipt
-                    self.out_queue.put({'type': proto.ack, 'val': id })
+                    print('Send ACK for id: {}'.format(id))
+
+                    msg_ack_bytes = proto.construct_ack_message(id)
+
+                    try:
+                        self.ser.write(msg_ack_bytes)
+                    except:
+                        print("Unable to send line ", msg_ack_bytes)
 
 
                 # handle measurements
@@ -138,7 +140,14 @@ class SerialHandler():
                                                     'key': msgtype,
                                                     'value': val})
                             # acknowledge receipt
-                            self.out_queue.put({'type': proto.ack, 'val': id })
+                            print('Send ACK for id: {}'.format(id))
+
+                            msg_ack_bytes = proto.construct_ack_message(id)
+
+                            try:
+                                self.ser.write(msg_ack_bytes)
+                            except:
+                                print("Unable to send line ", msg_ack_bytes)
 
 
                 # resend messages waiting for ack
