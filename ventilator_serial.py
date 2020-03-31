@@ -9,10 +9,9 @@ import ventilator_protocol
 
 class SerialHandler():
 
-    def __init__(self, db_queue, request_queue, out_queue, alarm_queue, port='/dev/ventilator', baudrate=115200):
-        self.ser = serial.Serial(port, baudrate)
-        self.ser.reset_input_buffer()
-        self.ser.reset_output_buffer()
+    def __init__(self, db_queue, request_queue, out_queue, alarm_queue, port='COM5', baudrate=115200):
+        self.port = port
+        self.baudrate = baudrate
         self.request_queue = request_queue
         self.db_queue = db_queue # Enqueue to
         self.out_queue = out_queue
@@ -33,6 +32,10 @@ class SerialHandler():
 
 
     def run(self, name):
+        self.ser = serial.Serial(self.port, self.baudrate)
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
+
         print("Starting {}".format(name))
         while True:
             try:
