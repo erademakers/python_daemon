@@ -5,6 +5,8 @@ import serial
 import queue
 import time
 import ventilator_protocol as proto
+from datetime import datetime
+import traceback
 
 
 class SerialHandler():
@@ -128,6 +130,7 @@ class SerialHandler():
                 # handle measurements
                 for msgtype in proto.measurements:
                     if line.startswith((msgtype + '=')):
+                        val = tokens[1]
                         self.queue_put(msgtype, val)
 
                 # handle settings
@@ -138,7 +141,7 @@ class SerialHandler():
                             # send to GUI
                             self.request_queue.put({'type': 'setting',
                                                     'key': msgtype,
-                                                    'value': val})
+                                                    'value': float(val)})
                             # acknowledge receipt
                             print('Send ACK for id: {}'.format(id))
 

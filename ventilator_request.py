@@ -17,8 +17,7 @@ class APIRequest():
             print("Couldn't reach the server")
 
     def send_setting(self, key, val):
-        print("Send {} setting to server, set to {}".format(key, val))
-        proto.settings_values[key] = val
+        print("Send setting to server, set to {}".format({key:val}))
         self.__put("/api/settings?returncomplete=false", {key:val})
 
     def send_error(self, val):
