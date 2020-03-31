@@ -19,7 +19,11 @@ settings = ['RR',   # Respiratory rate
             'ADPK', # Allowed deviation Peak Pressure
             'ADVT', # Allowed deviation Tidal Volume
             'ADPP', # Allowed deviation PEEP
-            'MODE'  # Machine Mode (Volume Control / Pressure Control)
+            'MODE',  # Machine Mode (Volume Control / Pressure Control)
+            'ACTIVE',  # Machine on / off
+            'PS', # support pressure
+            'RP', # ramp time
+            'TP', # trigger pressure
 ]
 
 settings_values = {
@@ -32,7 +36,11 @@ settings_values = {
     'ADPK': -1,
     'ADVT': -1,
     'ADPP': -1,
-    'MODE': -1
+    'MODE': -1,
+    'ACTIVE': -1,
+    'PS': -1,
+    'RP': -1,
+    'TP': -1,
 }
 
 def compute_LRC(bytes):
