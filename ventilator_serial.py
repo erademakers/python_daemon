@@ -13,12 +13,6 @@ class SerialHandler():
         self.port = port
         self.baudrate = baudrate
         self.ser = None
-        try:
-            self.ser = serial.Serial(self.port, self.baudrate)
-            self.ser.reset_input_buffer()
-            self.ser.reset_output_buffer()
-        except:
-            self.attempt_reconnection()
 
         self.request_queue = request_queue
         self.db_queue = db_queue # Enqueue to
@@ -61,8 +55,6 @@ class SerialHandler():
                 msg_bytes = bytearray(msg_out,'ascii')
                 msg_bytes.append(msg['checksum'])
                 msg_bytes = msg_bytes + bytearray("\n", 'ascii')
-                for byte in msg_bytes:
-                    print(byte)
                 try:
                     self.ser.write(msg_bytes)
                 except:
@@ -110,7 +102,6 @@ class SerialHandler():
                 # handle measurements
                 for msgtype in proto.measurements:
                     if line.startswith((msgtype + '=')):
-                        print("got measurement")
                         self.queue_put(msgtype, val)
 
                 # handle settings

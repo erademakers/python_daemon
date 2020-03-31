@@ -22,4 +22,5 @@ class APIRequest():
 
     def send_error(self, val):
         # self.__put("/api/settings", {'alarmValue':val})
-        print("todo; send the alarm")
+        # print("todo; send the alarm")
+        return

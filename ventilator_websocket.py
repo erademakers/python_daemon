@@ -64,8 +64,9 @@ class WebsocketHandler():
                     payload = msg['message']
                     if payload['type'] == "setting":
                         self.handle_settings(payload)
-            except:
+            except Exception as e:
                 print("Invalid message from websockets {}".format(json_msg))
+                print(e)
 
     def attempt_reconnect(self):
         while True:
@@ -78,11 +79,6 @@ class WebsocketHandler():
 
     def __init__(self, serial_queue, addr='localhost', port=3001):
         self.url = "ws://" + addr + ":" + str(port) + "/"
-        self.ws = websocket.WebSocket()
-        try:
-            self.ws.connect(self.url)
-        except:
-            self.attempt_reconnect()
 
         self.id = 1
         self.serial_queue = serial_queue
