@@ -53,7 +53,7 @@ def compute_LRC(bytes):
 
 def construct_serial_message(key, val, id):
     # every message we send has to have an id
-    msg_out = msg['type'] + "=" + str(msg['val'])  + "="
+    msg_out = "{}={}=".format(key, val)
     msg_bytes = bytearray(msg_out,'ascii')
     msg_bytes.append(self.message_id.to_bytes(1, byteorder='big'))
     msg_bytes.append(bytearray('=','ascii'))
