@@ -42,6 +42,10 @@ class WebsocketHandler():
 
     def run(self, name):
         print("Starting {}".format(name))
+
+        self.ws = websocket.WebSocket()
+        self.ws.connect(self.url)
+
         self.do_handshake()
         self.subscribe('settings')
 
@@ -61,9 +65,7 @@ class WebsocketHandler():
 
 
     def __init__(self, serial_queue, addr='localhost', port=3001):
-        url = "ws://" + addr + ":" + str(port) + "/"
-        self.ws = websocket.WebSocket()
-        self.ws.connect(url)
+        self.url = "ws://" + addr + ":" + str(port) + "/"
         self.id = 1
         self.serial_queue = serial_queue
 
