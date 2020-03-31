@@ -11,6 +11,7 @@ This daemon has a number of tasks
 import threading
 import queue
 import time
+import sys
 import multiprocessing as mp
 from ventilator_database import DbClient
 from ventilator_serial import SerialHandler
@@ -26,6 +27,9 @@ def run():
     """
     Do setup and start threads
     """
+    userport = None
+    if len(sys.argv) > 1:
+        userport = sys.argv[1]
 
     api_request = APIRequest("http://localhost:3001")
     api_request.send_setting("startPythonDaemon", datetime.utcnow())
@@ -35,7 +39,10 @@ def run():
     alarm_input_queue = mp.Queue() # Queue for values for Alarm thread
     request_queue = mp.Queue() # Queue with the requests to be sent to the API
 
-    ser_handler = SerialHandler(db_queue, request_queue, serial_output_queue, alarm_input_queue)
+    if userport:
+        ser_handler = SerialHandler(db_queue, request_queue, serial_output_queue, alarm_input_queue, port = userport)
+    else:
+        ser_handler = SerialHandler(db_queue, request_queue, serial_output_queue, alarm_input_queue)
     db_handler = DbClient(db_queue)
     websocket_handler = WebsocketHandler(serial_output_queue)
     alarm_handler = AlarmHandler(alarm_input_queue,serial_output_queue, request_queue)

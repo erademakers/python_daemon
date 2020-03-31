@@ -45,36 +45,42 @@ class SerialHandler():
                 self.ser.write(bytes(msg_out, 'ascii'))
 
 
-            line = self.ser.readline()
             try:
-                line = line.decode('utf-8')
-            except UnicodeDecodeError:
-                print("Failure decoding serial message, continuing")
-                if self.errorcounter == 0:
-                    self.errorcounter += 1
-                    print("utf-8 decode errorcounter: {}".format(self.errorcounter))
-                    continue
-                else:
-                    print("Repeatedly unable to decode serial messages, aborting!")
-                # TODO: At the start it can happen that we get an incorrect message
-                # due to incomplete data. I do a hard abort here to ensure that this only
-                # happens once. We need to determine what a tolerable level of failure is here.
+                line = self.ser.readline()
+            except:
+                print("Failure reading from serial port")
+                line = None
+
+            if line:
+                try:
+                    line = line.decode('utf-8')
+                except UnicodeDecodeError:
+                    print("Failure decoding serial message, continuing")
+                    if self.errorcounter == 0:
+                        self.errorcounter += 1
+                        print("utf-8 decode errorcounter: {}".format(self.errorcounter))
+                        continue
+                    else:
+                        print("Repeatedly unable to decode serial messages, aborting!")
+                    # TODO: At the start it can happen that we get an incorrect message
+                    # due to incomplete data. I do a hard abort here to ensure that this only
+                    # happens once. We need to determine what a tolerable level of failure is here.
 
 
-            tokens = line.split('=', 1)
-            val = tokens[-1].rstrip('\r\n')
+                tokens = line.split('=', 1)
+                val = tokens[-1].rstrip('\r\n')
 
-            if line.startswith(ventilator_protocol.alarm + '='):
-                self.alarm_queue.put({'type': 'ALARM', 'val': val})
+                if line.startswith(ventilator_protocol.alarm + '='):
+                    self.alarm_queue.put({'type': 'ALARM', 'val': val})
 
 
-            # handle measurements
-            for type in ventilator_protocol.measurements:
-                if line.startswith((type + '=')):
-                    self.queue_put(type, val)
+                # handle measurements
+                for type in ventilator_protocol.measurements:
+                    if line.startswith((type + '=')):
+                        self.queue_put(type, val)
 
-            # handle settings
-            for type in ventilator_protocol.settings:
-                if line.startswith((type + '=')):
-                    # Verify that the checksum is correct.
-                    pass
+                # handle settings
+                for type in ventilator_protocol.settings:
+                    if line.startswith((type + '=')):
+                        # Verify that the checksum is correct.
+                        pass
