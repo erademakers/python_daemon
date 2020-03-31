@@ -61,8 +61,8 @@ class WebsocketHandler():
                     reply = {'type': 'ping'}
                     self.send_msg(reply)
                 elif msg['type'] == "pub":
-                    payload = msg['message']
-                    if payload['type'] == "setting":
+                    if msg['path'] == "/api/settings"
+                        payload = msg['message']
                         self.handle_settings(payload)
             except Exception as e:
                 print("Invalid message from websockets {}".format(json_msg))
