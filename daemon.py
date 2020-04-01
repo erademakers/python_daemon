@@ -44,7 +44,7 @@ def run():
     else:
         ser_handler = SerialHandler(db_queue, request_queue, serial_output_queue, alarm_input_queue)
     db_handler = DbClient(db_queue)
-    websocket_handler = WebsocketHandler(serial_output_queue)
+    websocket_handler = WebsocketHandler(serial_output_queue, alarm_input_queue)
     alarm_handler = AlarmHandler(alarm_input_queue,serial_output_queue, request_queue)
     request_handler = RequestHandler(api_request, request_queue)
 

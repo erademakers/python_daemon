@@ -23,6 +23,9 @@ class WebsocketHandler():
                 print("send setting {}".format(key))
                 self.serial_queue.put({'type': key, 'val': settings[key]})
 
+    def raise_alarm(self):
+        self.alarm_queue.put({'type': proto.alarm, 'val': 1})
+
     def subscribe(self, path):
         """
         Subscribe to updates
@@ -60,6 +63,7 @@ class WebsocketHandler():
                 json_msg = self.ws.recv()
             except:
                 print("Timeout or socket closed: reconnecting")
+                self.raise_alarm()
                 self.ws.close()
                 self.attempt_reconnect()
                 self.do_handshake()
@@ -88,10 +92,11 @@ class WebsocketHandler():
             except:
                 continue
 
-    def __init__(self, serial_queue, addr='localhost', port=3001):
+    def __init__(self, serial_queue, alarm_queue, addr='localhost', port=3001):
         self.url = "ws://" + addr + ":" + str(port) + "/"
         self.id = 1
         self.serial_queue = serial_queue
+        self.alarm_queue = alarm_queue
 
 
 if __name__ == "__main__":

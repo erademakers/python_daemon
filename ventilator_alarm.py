@@ -42,7 +42,7 @@ class AlarmHandler():
                 msg = None
 
             if msg != None:
-                if msg['type'] == "ALARM":
+                if msg['type'] == proto.alarm:
                     self.time_last_kick_received == cur_time
                     if msg['val'] != 0:
                         self.request_queue.put({'type': 'error', 'value': msg['val']})
