@@ -5,7 +5,6 @@ import ventilator_protocol as proto
 
 class AlarmHandler():
 
-
     def __init__(self, input_queue, serial_queue, request_queue):
         """
         Alarm Handler constructor
