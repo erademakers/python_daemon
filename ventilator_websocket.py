@@ -39,6 +39,12 @@ class WebsocketHandler():
         self.send_msg(hello_msg)
         reply = self.ws.recv()
         print(reply)
+        try:
+            msg = json.loads(reply)
+            self.interval = msg['heartbeat']['interval']
+            self.ws.settimeout(self.interval/1000)
+        except:
+            print("Could not parse handshake response")
 
     def run(self, name):
         print("Starting {}".format(name))
@@ -50,7 +56,16 @@ class WebsocketHandler():
         self.subscribe('settings')
 
         while True:
-            json_msg = self.ws.recv()
+            try:
+                json_msg = self.ws.recv()
+            except:
+                print("Timeout or socket closed: reconnecting")
+                self.ws.close()
+                self.attempt_reconnect()
+                self.do_handshake()
+                self.subscribe('settings')
+                continue
+
             try:
                 msg = json.loads(json_msg)
                 if msg['type'] == "ping":
