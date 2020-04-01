@@ -75,7 +75,6 @@ class WebsocketHandler():
 
     def __init__(self, serial_queue, addr='localhost', port=3001):
         self.url = "ws://" + addr + ":" + str(port) + "/"
-
         self.id = 1
         self.serial_queue = serial_queue
 

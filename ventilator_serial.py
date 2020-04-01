@@ -15,7 +15,6 @@ class SerialHandler():
         self.port = port
         self.baudrate = baudrate
         self.ser = None
-
         self.request_queue = request_queue
         self.db_queue = db_queue # Enqueue to
         self.out_queue = out_queue
@@ -170,4 +169,5 @@ class SerialHandler():
             except Exception as e:
                 print(e)
                 traceback.print_exc()
+
 
