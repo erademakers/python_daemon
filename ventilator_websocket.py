@@ -3,7 +3,7 @@ import websocket
 import json
 import asyncio
 import websockets
-import ventilator_protocol
+import ventilator_protocol as proto
 
 
 class WebsocketHandler():
@@ -18,10 +18,10 @@ class WebsocketHandler():
         self.ws.send(json.dumps(msg))
 
     def handle_settings(self, settings):
-        for key in ventilator_protocol.settings:
+        for key in proto.settings:
             if key in settings:
-                msg = {'type': key, 'val': settings[key]}
-                self.serial_queue.put(msg)
+                print("send setting {}".format(key))
+                self.serial_queue.put({'type': key, 'val': settings[key]})
 
     def subscribe(self, path):
         """
@@ -57,15 +57,25 @@ class WebsocketHandler():
                     reply = {'type': 'ping'}
                     self.send_msg(reply)
                 elif msg['type'] == "pub":
-                    payload = msg['message']
-                    if payload['type'] == "setting":
+                    if msg['path'] == "/api/settings":
+                        payload = msg['message']
                         self.handle_settings(payload)
-            except:
+            except Exception as e:
                 print("Invalid message from websockets {}".format(json_msg))
+                print(e)
 
+    def attempt_reconnect(self):
+        while True:
+            try:
+                self.ws.connect(self.url)
+                if self.ws.connected == True:
+                    return
+            except:
+                continue
 
     def __init__(self, serial_queue, addr='localhost', port=3001):
         self.url = "ws://" + addr + ":" + str(port) + "/"
+
         self.id = 1
         self.serial_queue = serial_queue
 

@@ -1,5 +1,6 @@
 import queue
 import time
+import ventilator_protocol as proto
 
 
 class AlarmHandler():
@@ -32,7 +33,7 @@ class AlarmHandler():
             cur_time = time.time()
             # Do we need to kick the watchdog?
             if ((cur_time - self.time_last_kick_sent) > 1 ):
-                self.serial_queue.put({'type': 'ALARM', 'val': self.alarm_val})
+                self.serial_queue.put({'type': proto.alarm, 'val': self.alarm_val})
                 self.time_last_kick_sent = cur_time
 
             try:

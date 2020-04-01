@@ -3,6 +3,7 @@ Settings definition for ventilator
 """
 
 alarm ="ALARM"
+ack ="ACK"
 
 measurements = ['BPM',  # Breaths per minute
                 'VOL',  # Volume
@@ -19,5 +20,53 @@ settings = ['RR',   # Respiratory rate
             'ADPK', # Allowed deviation Peak Pressure
             'ADVT', # Allowed deviation Tidal Volume
             'ADPP', # Allowed deviation PEEP
-            'MODE'  # Machine Mode (Volume Control / Pressure Control)
+            'MODE',  # Machine Mode (Volume Control / Pressure Control)
+            'ACTIVE',  # Machine on / off
+            'PS', # support pressure
+            'RP', # ramp time
+            'TP', # trigger pressure
 ]
+
+settings_values = {
+    'RR': -1,
+    'VT': -1,
+    'PK': -1,
+    'TS': -1,
+    'IE': -1,
+    'PP': -1,
+    'ADPK': -1,
+    'ADVT': -1,
+    'ADPP': -1,
+    'MODE': -1,
+    'ACTIVE': -1,
+    'PS': -1,
+    'RP': -1,
+    'TP': -1,
+}
+
+def compute_LRC(bytes):
+    checksum = 0
+    for byte in bytes:
+        checksum ^= byte
+
+    return checksum
+
+def construct_serial_message(key, val, id):
+    # every message we send has to have an id
+    msg_out = "{}={}=".format(key, val)
+    msg_bytes = bytearray(msg_out,'ascii')
+    msg_bytes += id.to_bytes(1, byteorder='big')
+    msg_bytes += bytearray('=','ascii')
+    msg_bytes.append(compute_LRC(msg_bytes))
+    msg_bytes += bytearray("\n", 'ascii')
+
+    return msg_bytes
+
+def construct_ack_message(id):
+    msg_bytes = bytearray("ACK=", 'ascii')
+    msg_bytes += id.to_bytes(1, byteorder='big')
+    msg_bytes += bytearray('=','ascii')
+    msg_bytes.append(compute_LRC(msg_bytes))
+    msg_bytes += bytearray("\n", 'ascii')
+
+    return msg_bytes

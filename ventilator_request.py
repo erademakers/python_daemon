@@ -1,4 +1,5 @@
 import requests
+import ventilator_protocol as proto
 
 class APIRequest():
 
@@ -16,7 +17,10 @@ class APIRequest():
             print("Couldn't reach the server")
 
     def send_setting(self, key, val):
-        self.__put("/api/settings", {key:val})
+        print("Send setting to server, set to {}".format({key:val}))
+        self.__put("/api/settings?returncomplete=false", {key:val})
 
     def send_error(self, val):
-        self.__put("/api/settings", {'alarmValue':val})
+        # self.__put("/api/settings", {'alarmValue':val})
+        # print("todo; send the alarm")
+        return
