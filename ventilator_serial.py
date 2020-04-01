@@ -153,6 +153,10 @@ class SerialHandler():
                                 print("Unable to send line ", msg_ack_bytes)
 
 
+                for msgtype in proto.internal_settings:
+                    if line.startswith((msgtype + "=")):
+                        print("Received internal settings parameter {}".format(msgtype))
+
                 # resend messages waiting for ack
                 now = time.monotonic()
                 delete = [] 
