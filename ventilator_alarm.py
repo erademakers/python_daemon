@@ -26,10 +26,12 @@ class AlarmHandler():
         self.time_watchdog_kick_checked = 0
 
         self.first_watchdog_kick_received = False
+        self.start_time = 0
 
 
     def run(self, name):
         print("Starting {}".format(name))
+        self.start_time = time.time()
         while True:
 
             cur_time = time.time()
@@ -60,5 +62,9 @@ class AlarmHandler():
 
             time.sleep(0.2)
 
+
+            # Have we received the first watchdog kick in a reasonable timeframe?
+            if not self.first_watchdog_kick_received and ((cur_time - self.start_time) > 30):
+                #TODO: Raise watchdog timeout alarm.
 
 
