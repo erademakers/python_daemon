@@ -16,6 +16,10 @@ class APIRequest():
         except requests.RequestException:
             print("Couldn't reach the server")
 
+    def send_setting_float(self, key, val):
+        print("Send float setting to server, set to {}".format({key:float(val)}))
+        self.__put("/api/settings?returncomplete=false", {key:float(val)})
+
     def send_setting(self, key, val):
         print("Send setting to server, set to {}".format({key:val}))
         self.__put("/api/settings?returncomplete=false", {key:val})
