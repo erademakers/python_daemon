@@ -66,5 +66,6 @@ class AlarmHandler():
             # Have we received the first watchdog kick in a reasonable timeframe?
             if not self.first_watchdog_kick_received and ((cur_time - self.start_time) > 30):
                 #TODO: Raise watchdog timeout alarm.
+                pass
 
 
