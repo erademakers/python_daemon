@@ -5,7 +5,7 @@ import serial
 import queue
 import time
 import ventilator_protocol as proto
-from datetime import datetime
+import time
 import traceback
 
 
@@ -58,7 +58,7 @@ class SerialHandler():
 
                 msg_bytes = proto.construct_serial_message(msg['type'], msg['val'], self.message_id)
 
-                waiting_for_ack = {'msg': msg, 'sent_at': datetime.utcnow().timestamp()}
+                waiting_for_ack = {'msg': msg, 'sent_at': time.monotonic()}
                 waiting_for_acks[self.message_id] = waiting_for_ack
 
                 # we sent a message with id, so increment it
@@ -154,7 +154,7 @@ class SerialHandler():
 
 
                 # resend messages waiting for ack
-                now = datetime.utcnow().timestamp()
+                now = time.monotonic()
                 delete = [] 
                 for waiting_message in waiting_for_acks.items():
                     if waiting_message[1]['sent_at'] + 1 < now:  #throws error
