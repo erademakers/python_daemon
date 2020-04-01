@@ -8,7 +8,9 @@ ack ="ACK"
 measurements = ['BPM',  # Breaths per minute
                 'VOL',  # Volume
                 'TRIG', # Trigger
-                'PRES'  # Pressure
+                'PRES', # Pressure
+                'FLOW', # Liters/min
+                'CPU'   # CPU usage
 ]
 
 settings = ['RR',   # Respiratory rate
@@ -25,6 +27,9 @@ settings = ['RR',   # Respiratory rate
             'PS', # support pressure
             'RP', # ramp time
             'TP', # trigger pressure
+]
+
+internal_settings = ['TPRESS'  # Target pressure
 ]
 
 settings_values = {

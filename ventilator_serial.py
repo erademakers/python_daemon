@@ -89,6 +89,13 @@ class SerialHandler():
                 line = line[:-1]
                 calculated_checksum = proto.compute_LRC(line)
 
+                id = line[-2]
+                line = line[:-2]
+                line = line.decode('ascii')
+                tokens = line.split('=')
+                key = tokens[0]
+                val = tokens[1]
+
                 if checksum != calculated_checksum:
                     print(line)
                     print("Checksum does not match, discard")
@@ -101,12 +108,6 @@ class SerialHandler():
                                                            calculated_checksum))
                     continue
 
-                id = line[-2]
-                line = line[:-2]
-     
-                line = line.decode('ascii')
-                tokens = line.split('=')
-                key = tokens[0]
                 print("Received message: {}".format(line))
 
                 if line.startswith(proto.ack + '='):

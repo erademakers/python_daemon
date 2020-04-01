@@ -29,6 +29,13 @@ class DbClient():
         collection = self.db.trigger_values
         self.__store_value(collection, trigger_val)
 
+    def store_flow(self, flow_val):
+        collection = self.db.flow_values
+        self.__store_value(collection, flow_val)
+
+    def store_cpu(self, cpu_val):
+        collection = self.db.cpu_values
+        self.__store_value(collection, cpu_val)
 
     def __store_value(self, collection, val):
         try:
@@ -62,6 +69,10 @@ class DbClient():
                     self.store_trigger(msg['val'])
                 elif msg['type'] == 'PRES':
                     self.store_pressure(msg['val'])
+                elif msg['type'] == 'FLOW':
+                    self.store_flow(msg['val'])
+                elif msg['type'] == 'CPU':
+                    self.store_cpu(msg['val'])
             except:
                 print("Invalid message from database")
 
