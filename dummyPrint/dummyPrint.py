@@ -4,6 +4,19 @@ import sys
 import serial
 import time
 
+def getCRC(msg):
+    checksum = 0
+    for c in msg:
+        checksum = checksum ^ ord(c)
+
+    return checksum
+
+def serialSend(ser, msg):
+    msg = msg + '='
+    ser.write(msg.encode('utf-8') + \
+        getCRC(msg).to_bytes(2, 'little') + \
+        "\r\n".encode('utf-8'))
+
 def dummyPrint(device):
     print(device)
     ser = serial.Serial(device, 115200, timeout=1)
@@ -12,20 +25,15 @@ def dummyPrint(device):
     while True:
         flag = 0
         try:
-            ser.write("BPM=100\n".encode('utf-8'))
-            ser.write("VOL=200\n".encode('utf-8'))
-            ser.write("TRIG=0\n".encode('utf-8'))
-            ser.write("PRES=20\n".encode('utf-8'))
-            if ser.in_waiting > 0:
-                rcv = ser.read()
-                if rcv == 'T':
-                    flag = 1
-                rcv = ser.read()
-            if flag == 1:
-                ser.write("OK\n".encode('utf-8'))
-            else:
-                ser.write("NOK\n".encode('utf-8'))
-        except:
+            serialSend(ser, "BPM=100=1")
+            serialSend(ser, "VOL=200=2")
+            serialSend(ser, "CPU=0=3")
+            serialSend(ser, "PRES=3=4")
+            serialSend(ser, "FLOW=5=5")
+            serialSend(ser, "CPU=40=6")
+            serialSend(ser, "TPRESS=4=7")
+        except e:
+            print(e)
             print("Serial disconnected or not available")
             ser.close()
             break
