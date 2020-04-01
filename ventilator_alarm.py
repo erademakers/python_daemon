@@ -25,14 +25,18 @@ class AlarmHandler():
 
         self.time_watchdog_kick_checked = 0
 
+        self.first_watchdog_kick_received = False
+        self.start_time = 0
+
 
     def run(self, name):
         print("Starting {}".format(name))
+        self.start_time = time.time()
         while True:
 
             cur_time = time.time()
-            # Do we need to kick the watchdog?
-            if ((cur_time - self.time_last_kick_sent) > 1 ):
+            # Do we need to kick the watchdog? Only after we've received the first kick
+            if self.first_watchdog_kick_received and ((cur_time - self.time_last_kick_sent) > 1 ):
                 self.serial_queue.put({'type': proto.alarm, 'val': self.alarm_val})
                 self.time_last_kick_sent = cur_time
 
@@ -44,11 +48,13 @@ class AlarmHandler():
             if msg != None:
                 if msg['type'] == "ALARM":
                     self.time_last_kick_received == cur_time
+                    if not self.first_watchdog_kick_received:
+                        self.first_watchdog_kick_received = True
                     if msg['val'] != 0:
                         self.request_queue.put({'type': 'error', 'value': msg['val']})
 
             # Have we received a watchdog kick in time?
-            if ((cur_time - self.time_watchdog_kick_checked) > 3):
+            if self.first_watchdog_kick_received and ((cur_time - self.time_watchdog_kick_checked) > 3):
                 self.time_watchdog_kick_checked = cur_time
                 # Send a watchdog error to the UI every 3 seconds if we lose connection
                 if(cur_time - self.time_last_kick_received > 3):
@@ -56,5 +62,9 @@ class AlarmHandler():
 
             time.sleep(0.2)
 
+
+            # Have we received the first watchdog kick in a reasonable timeframe?
+            if not self.first_watchdog_kick_received and ((cur_time - self.start_time) > 30):
+                #TODO: Raise watchdog timeout alarm.
 
 
