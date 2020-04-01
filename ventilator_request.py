@@ -20,6 +20,11 @@ class APIRequest():
         print("Send setting to server, set to {}".format({key:val}))
         self.__put("/api/settings?returncomplete=false", {key:val})
 
+    def send_alarm(self, priority, val):
+        print("Send alarm to server, set to {}".format({priority:val}))
+        self.__put("/api/alarms", {'alarmPriority':priority}, {'alarmValue':val})
+        return
+
     def send_error(self, val):
         # self.__put("/api/settings", {'alarmValue':val})
         # print("todo; send the alarm")

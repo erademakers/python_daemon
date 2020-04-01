@@ -20,5 +20,7 @@ class RequestHandler:
                         self.api_client.send_setting(msg['key'], msg['value'])
                     elif msg['type'] == 'error':
                         self.api_client.send_error(msg['value'])
+                    elif msg['type'] == 'alarm':
+                        self.api_client.send_alarm(msg['priority'], msg['value'])
                 except:
-                    print("Invalid message from request")
+                    print("Invalid message from request {}".format(msg))

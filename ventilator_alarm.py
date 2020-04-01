@@ -46,6 +46,11 @@ class AlarmHandler():
                     self.time_last_kick_received == cur_time
                     if msg['val'] != 0:
                         self.request_queue.put({'type': 'error', 'value': msg['val']})
+                elif msg['type'] == "PRES":
+                    if ((msg['val'] > proto.settings_values['PK'] + proto.settings_values['ADPK']) or
+                       (msg['val'] < proto.settings_values['PK'] - proto.settings_values['ADPK'])):
+                        self.request_queue.put({'type': 'alarm', 'priority': 42, 'value': 5})
+                        self.serial_queue.put({'type': proto.alarm, 'priority': 42, 'val': 5})
 
             # Have we received a watchdog kick in time?
             if ((cur_time - self.time_watchdog_kick_checked) > 3):
