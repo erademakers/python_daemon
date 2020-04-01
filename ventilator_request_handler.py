@@ -17,7 +17,7 @@ class RequestHandler:
             if msg != None:
                 try:
                     if msg['type'] == 'setting':
-                        self.api_client.send_setting(msg['key'], msg['value'])
+                        self.api_client.send_setting_float(msg['key'], msg['value'])
                     elif msg['type'] == 'error':
                         self.api_client.send_error(msg['value'])
                 except:
