@@ -27,6 +27,8 @@ settings = ['RR',   # Respiratory rate
             'PS', # support pressure
             'RP', # ramp time
             'TP', # trigger pressure
+            'MT', # mute
+            'FW', # firmware version
 ]
 
 internal_settings = ['TPRESS'  # Target pressure
@@ -47,6 +49,8 @@ settings_values = {
     'PS': -1,
     'RP': -1,
     'TP': -1,
+    'MT': -1,
+    'FW': -1,
 }
 
 def compute_LRC(bytes):
